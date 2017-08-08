@@ -5,56 +5,68 @@ const fs = require('fs');
 const port = process.env.PORT || 3000;
 var app = express();
 
-hbs.registerPartials(__dirname + '/views/partials');
+hbs.registerPartials(__dirname + '/views/partials')
 app.set('view engine', 'hbs');
 
-app.use((request, response, next) => {
-    var now = new Date().toString();
 
-    var log = `Time: ${now} | | Request method: ${request.method} | | Request URL: ${request.url}`;
-    console.log(`Time: ${now} | | Request method: ${request.method} | | Request URL: ${request.url}`);
-    fs.appendFile('server.log', log + '\n', (err) => {
-        if(err) { 
-            console.log('Unable to update server logs');
-        }
-    });
-    next();
+app.use((req, res, next) => {
+  var now = new Date().toString();
+  var log = `${now}: ${req.method} ${req.url}`;
+
+  console.log(log);
+  fs.appendFile('server.log', log + '\n', (err) => {
+      if(err){
+          console.log('There was an error logging to server.log');
+      }
+  });
+  next();
 });
 
-// app.use((request, response, next) => {
-//     response.render('maintenence.hbs');
+// app.use((req, res, next) => {
+//   res.render('maintenance.hbs');
 // });
 
 app.use(express.static(__dirname + '/public'));
 
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
 hbs.registerHelper('getCurrentYear', () => {
-    return new Date().getFullYear();
-    // return 'This is a test';
+  return new Date().getFullYear();
 });
 
 hbs.registerHelper('screamIt', (text) => {
-    return text.toUpperCase();
+  return text.toUpperCase();
 });
 
-app.get('/', (request, response) => {
-    response.render('home.hbs', {
-        pageTitle: 'Hi Daddy',
-        welcomeMessage: 'Welcome to my website??????????'
-    })
+app.get('/', (req, res) => {
+  res.render('home.hbs', {
+    pageTitle: 'Home Page',
+    welcomeMessage: 'Welcome to my website'
+  });
 });
 
-app.get('/about', (request, response) => {
-    response.render('about.hbs', {
-        pageTitle: 'About Page',
-    });
+app.get('/about', (req, res) => {
+  res.render('about.hbs', {
+    pageTitle: 'About Page'
+  });
 });
 
-app.get('/bad', (request, response) => {
-    response.send({
-        errorMessage: 'Unable to handle request'
-    });
+app.get('/projects', (req, res) => {
+  res.render('projects.hbs', {
+    pageTitle: 'Projects'
+  });
+});
+
+// /bad - send back json with errorMessage
+app.get('/bad', (req, res) => {
+  res.send({
+    errorMessage: 'Unable to handle request'
+  });
 });
 
 app.listen(port, () => {
-    console.log(`Server is up on port ${port}`);
-});
+  console.log(`Server is up on port ${port}`);
+}).catch;
