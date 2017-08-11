@@ -16,7 +16,7 @@ app.use((req, res, next) => {
   console.log(log);
   fs.appendFile('server.log', log + '\n', (err) => {
       if(err){
-          console.log('There was an error while logging to server.log');
+          console.log('There was an error while logging to the log file server.log');
       }
   });
   next();
